@@ -1,0 +1,29 @@
+convert VCF into Plink readable format (map,ped) then Plink binary format (fam,bed,bim)
+
+#conda install vcftools
+vcftools --vcf pruned_coatColor_maf_geno.vcf --plink --out coatColor
+plink --file coatColor --allow-no-sex --dog --make-bed --out coatColor.binary
+
+plink --bfile coatColor.binary --assoc --make-pheno coatColoplink --bfile allSnp.binary --dog --keep dog_breeds_eff --extract plink.prune.in --out pruned_allSnp --recoder.pheno "yellow" --a2-allele pruned_coatColor_maf_geno.vcf 4 3 '#' --allow-no-sex --adjust --dog --out coatColor
+
+
+
+
+## c) "new" get representative variant per haplotype (pruning)
+## Variants are pruned based on the variance inflation factor (VIF), which recursively removes SNPs within a sliding window of 50 SNPs and 5 SNPs is used to shift the window at each step with VIF threathold equals 2 (The parameters for --indep). To read more about VIF: https://en.wikipedia.org/wiki/Variance_inflation_factor
+plink --bfile allSnp.binary --dog --maf 0.05 --geno 0.05 --keep dog_breeds_eff --indep 50 5 2 
+#plink --bfile allSnp.binary --dog --keep dog_breeds_eff --extract plink.prune.in --recode vcf-iid --out pruned_allSnp ## to generate VCF
+                                                                                                            
+plink --file pruned_allSnp --allow-no-sex --dog --make-bed --out pruned_allSnp.binary
+
+
+
+
+#conda install vcftools
+vcftools --vcf pruned_coatColor_maf_geno.vcf --plink --out coatColor
+plink --file coatColor --allow-no-sex --dog --make-bed --out coatColor.binary
+
+plink --bfile coatColor.binary --assoc --make-pheno coatColoplink --bfile allSnp.binary --dog --keep dog_breeds_eff --extract plink.prune.in --out pruned_allSnp --recoder.pheno "yellow" --a2-allele pruned_coatColor_maf_geno.vcf 4 3 '#' --allow-no-sex --adjust --dog --out coatColor
+
+
+cat  file name AWK    > outpot file name 
