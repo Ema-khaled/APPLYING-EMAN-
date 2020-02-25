@@ -1,29 +1,70 @@
-convert VCF into Plink readable format (map,ped) then Plink binary format (fam,bed,bim)
+#assignment 2 (Eman Khaled Ahmed ID = 191092 )
+mkdir -p ~/GWAS && cd ~/GWAS
+wget https://de.cyverse.org/dl/d/E0A502CC-F806-4857-9C3A-BAEAA0CCC694/pruned_coatColor_maf_geno.vcf.gz
+gunzip pruned_coatColor_maf_geno.vcf.gz
+wget https://de.cyverse.org/dl/d/3B5C1853-C092-488C-8C2F-CE6E8526E96B/coatColor.pheno
 
 #conda install vcftools
 vcftools --vcf pruned_coatColor_maf_geno.vcf --plink --out coatColor
 plink --file coatColor --allow-no-sex --dog --make-bed --out coatColor.binary
+plink --bfile coatColor.binary --assoc --make-pheno coatColor.pheno "yellow" --a2-allele pruned_coatColor_maf_geno.vcf 4 3 '#' --allow-no-sex --adjust --dog --out coatColor
 
-plink --bfile coatColor.binary --assoc --make-pheno coatColoplink --bfile allSnp.binary --dog --keep dog_breeds_eff --extract plink.prune.in --out pruned_allSnp --recoder.pheno "yellow" --a2-allele pruned_coatColor_maf_geno.vcf 4 3 '#' --allow-no-sex --adjust --dog --out coatColor
-
-
-
-
-## c) "new" get representative variant per haplotype (pruning)
-## Variants are pruned based on the variance inflation factor (VIF), which recursively removes SNPs within a sliding window of 50 SNPs and 5 SNPs is used to shift the window at each step with VIF threathold equals 2 (The parameters for --indep). To read more about VIF: https://en.wikipedia.org/wiki/Variance_inflation_factor
-plink --bfile allSnp.binary --dog --maf 0.05 --geno 0.05 --keep dog_breeds_eff --indep 50 5 2 
-#plink --bfile allSnp.binary --dog --keep dog_breeds_eff --extract plink.prune.in --recode vcf-iid --out pruned_allSnp ## to generate VCF
-                                                                                                            
-plink --file pruned_allSnp --allow-no-sex --dog --make-bed --out pruned_allSnp.binary
-
+#RESULT 
+476840 variants and 53 dogs pass filters and QC.
+cat coatColor.assoc.adjusted| awk '$5<=0.05' >Doctor_asso     {1}
+...........................................................................................................................................................
+ #second PURNED 
+mkdir -p ~/GWAS2 && cd ~/GWAS2
+wget https://de.cyverse.org/dl/d/E0A502CC-F806-4857-9C3A-BAEAA0CCC694/pruned_coatColor_maf_geno.vcf.gz
+gunzip pruned_coatColor_maf_geno.vcf.gz
+wget https://de.cyverse.org/dl/d/3B5C1853-C092-488C-8C2F-CE6E8526E96B/coatColor.pheno
 
 
+plink --bfile coatColor.binary --dog  --indep 40 5 2
+plink --bfile coatColor.binary --dog  --extract plink.prune.in --out pruned_coatColor1 --recode
+plink --file pruned_coatColor1 --allow-no-sex --dog --make-bed --out pruned_coatColor1.binary
+plink --bfile pruned_coatColor1.binary --assoc --make-pheno coatColor.pheno "yellow" --a2-allele pruned_coatColor_maf_geno.vcf 4 3 '#' --allow-no-sex --adjust --dog --out coatColor
 
-#conda install vcftools
-vcftools --vcf pruned_coatColor_maf_geno.vcf --plink --out coatColor
-plink --file coatColor --allow-no-sex --dog --make-bed --out coatColor.binary
+#result 
+170454 variants and 53 dogs pass filters and QC.
+Among remaining phenotypes, 24 are cases and 29 are controls.
+Writing C/C --assoc report to coatColor.assoc ... done.
+--adjust: Genomic inflation est. lambda (based on median chisq) = 4.8932.
+--adjust values (170454 variants) written to coatColor.assoc.adjusted .
 
-plink --bfile coatColor.binary --assoc --make-pheno coatColoplink --bfile allSnp.binary --dog --keep dog_breeds_eff --extract plink.prune.in --out pruned_allSnp --recoder.pheno "yellow" --a2-allele pruned_coatColor_maf_geno.vcf 4 3 '#' --allow-no-sex --adjust --dog --out coatColor
+cat coatColor.assoc.adjusted| awk '$5<=0.05' >eman_asso_1      {2}
+
+...............................................................................................................................................................................................
+
+#THIRD PURENED 
+plink --bfile pruned_coatColor1.binary --dog  --indep 60 6 3
+plink --bfile pruned_coatColor1.binary --dog  --extract plink.prune.in --out pruned_coatColor2 --recode
+plink --file pruned_coatColor2 --allow-no-sex --dog --make-bed --out pruned_coatColor2.binary
+
+plink --bfile pruned_coatColor2.binary --assoc --make-pheno coatColor.pheno "yellow" --a2-allele pruned_coatColor_maf_geno.vcf 4 3 '#' --allow-no-sex --adjust --dog --out coatColor2
+
+#result 
+88375 variants and 53 dogs pass filters and QC.
+Among remaining phenotypes, 24 are cases and 29 are controls.
+Writing C/C --assoc report to coatColor2.assoc ... done.
+--adjust: Genomic inflation est. lambda (based on median chisq) = 4.46001.
+--adjust values (88375 variants) written to coatColor2.assoc.adjusted .
+
+
+
+cat coatColor2.assoc.adjusted| awk '$5<=0.05' >eman_asso_2
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 cat  file name AWK    > outpot file name 
